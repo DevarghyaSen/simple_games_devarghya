@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Snake Game</title>
+    <style>
+      #canvas {
+        border: 3px solid black;
+      }
+      #scoreboard {
+        font-size: 50px;
+        font-family: 'Press Start 2P', cursive;
+        text-align: center;
+      }
+      @import url('https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap');
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="1515" height="600"></canvas>
+    <div id="scoreboard">Score: 0</div>
+    <script>
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const scoreboard = document.getElementById('scoreboard');
+      
+      const gridSize = 20;
+      const gridWidth = canvas.width / gridSize;
+      const gridHeight = canvas.height / gridSize;
+      
+      let snake = [{x: 10, y: 10}];
+      let direction = {x: 1, y: 0};
+      let food = {x: Math.floor(Math.random() * gridWidth), y: Math.floor(Math.random() * gridHeight)};
+      let score = 0;
+      
+      function drawSnake() {
+        ctx.fillStyle = 'purple';
+        for (let i = 0; i < snake.length; i++) {
+          const {x, y} = snake[i];
+          ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
+        }
+      }
+      
+      function drawFood() {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+      }
+      
+      function update() {
+        const {x, y} = snake[0];
+        const newX = x + direction.x;
+        const newY = y + direction.y;
+      
+        // Check for collision with food
+        if (newX === food.x && newY === food.y) {
+          food.x = Math.floor(Math.random() * gridWidth);
+          food.y = Math.floor(Math.random() * gridHeight);
+          score++;
+          scoreboard.innerHTML = 'Score: ' + score;
+        } else {
+          // Remove the last segment of the snake
+          snake.pop();
+        }
+      
+        // Check for collision with walls
+        if (newX < 0 || newX >= gridWidth || newY < 0 || newY >= gridHeight) {
+          clearInterval(intervalId);
+          alert('Game over!');
+          return;
+        }
+      
+        // Check for collision with the snake's body
+        for (let i = 1; i < snake.length; i++) {
+          if (newX === snake[i].x && newY === snake[i].y) {
+            clearInterval(intervalId);
+            alert('Game over!');
+            return;
+          }
+        }
+      
+        // Add the new segment to the beginning of the snake
+        snake.unshift({x: newX, y: newY});
+      }
+      
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawSnake();
+        drawFood();
+      }
+      
+      document.addEventListener('keydown', function(event) {
+        switch (event.keyCode) {
+          case 37: // Left arrow or A
+          case 65: // A
+            direction = {x: -1, y: 0};
+            break;
+          case 38: // Up arrow or W
+          case 87: // W
+            direction = {x: 0, y: -1};
+            break;
+          case 39: // Right arrow or D
+          case 68: // D
+            direction = {x: 1, y: 0};
+            break;
+          case 40: // Down arrow or S
+          case 83: // S
+            direction = {x: 0, y: 1};
+            break;
+        }
+      });
+      
+      let intervalId = setInterval(function() {
+        update();
+        draw();
+      }, 100);
+    </script>
+  </body>
+</html>
